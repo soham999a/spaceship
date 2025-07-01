@@ -8,7 +8,10 @@
 3. Click "New Project"
 4. Import your repository: `https://github.com/soham999a/spaceship.git`
 5. Vercel will automatically detect it's a static site
-6. Click "Deploy"
+6. **IMPORTANT**: Add environment variable:
+   - **Name**: `NASA_API_KEY`
+   - **Value**: `uOMS8AKUbcK9MLgnDaVN6wvYXpwfiOBW1SetEXzr`
+7. Click "Deploy"
 
 ### Method 2: Vercel CLI
 ```bash
@@ -27,11 +30,27 @@ vercel
 # - Override settings? N
 ```
 
+## 🔑 Environment Variables
+
+**Required for NASA API integration:**
+
+| Variable | Value | Description |
+|----------|-------|-------------|
+| `NASA_API_KEY` | `uOMS8AKUbcK9MLgnDaVN6wvYXpwfiOBW1SetEXzr` | NASA API key for real space data |
+
+### How to Add in Vercel:
+1. Go to your Vercel project dashboard
+2. Settings → Environment Variables
+3. Add: `NASA_API_KEY` = `uOMS8AKUbcK9MLgnDaVN6wvYXpwfiOBW1SetEXzr`
+4. Select all environments (Production, Preview, Development)
+5. Save and redeploy
+
 ## Configuration
 
 The project includes:
 - ✅ `vercel.json` - Vercel configuration
 - ✅ `.gitignore` - Proper file exclusions
+- ✅ `.env.example` - Environment variable template
 - ✅ Static HTML setup - Ready for deployment
 
 ## Important Notes
