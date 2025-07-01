@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Space Tourism Portal 2090</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="description" content="Explore the galaxy with Space Tourism Portal 2090 - Book your interplanetary vacation today!">
+    <style>
+      body {
+        font-family: 'Orbitron', monospace;
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a0b2e 50%, #16213e 100%);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .neon-glow {
+        box-shadow:
+          0 0 5px currentColor,
+          0 0 10px currentColor,
+          0 0 15px currentColor,
+          0 0 20px currentColor;
+      }
+
+      .cosmic-bg {
+        background:
+          radial-gradient(ellipse at 20% 50%, rgba(191, 0, 255, 0.3) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 20%, rgba(0, 245, 255, 0.3) 0%, transparent 50%),
+          radial-gradient(ellipse at 40% 80%, rgba(255, 0, 128, 0.2) 0%, transparent 50%),
+          linear-gradient(135deg, #0a0a0f 0%, #1a0b2e 50%, #16213e 100%);
+      }
+
+      .stars, .stars2, .stars3 {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .stars {
+        background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="0.5" fill="white" opacity="0.8"/><circle cx="80" cy="40" r="0.3" fill="white" opacity="0.6"/><circle cx="40" cy="80" r="0.4" fill="white" opacity="0.7"/><circle cx="90" cy="90" r="0.2" fill="white" opacity="0.5"/><circle cx="10" cy="60" r="0.3" fill="white" opacity="0.6"/></svg>') repeat;
+        animation: move-stars 50s linear infinite;
+      }
+
+      .stars2 {
+        background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="30" cy="30" r="0.3" fill="cyan" opacity="0.4"/><circle cx="70" cy="70" r="0.2" fill="cyan" opacity="0.3"/><circle cx="50" cy="10" r="0.4" fill="cyan" opacity="0.5"/></svg>') repeat;
+        animation: move-stars 100s linear infinite;
+      }
+
+      .stars3 {
+        background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="60" cy="20" r="0.2" fill="purple" opacity="0.3"/><circle cx="20" cy="80" r="0.3" fill="purple" opacity="0.4"/></svg>') repeat;
+        animation: move-stars 150s linear infinite;
+      }
+
+      @keyframes move-stars {
+        from { transform: translateY(0px); }
+        to { transform: translateY(-100vh); }
+      }
+
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stars"></div>
+    <div class="stars2"></div>
+    <div class="stars3"></div>
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect, useReducer } = React;
+
+      // NASA API Configuration
+      const NASA_API_KEY = 'uOMS8AKUbcK9MLgnDaVN6wvYXpwfiOBW1SetEXzr';
+
+      // Sample planets data
+      const samplePlanets = [
+        {
+          id: 'kepler-452b',
+          name: 'Kepler-452b',
+          type: 'exoplanet',
+          distance: 1402,
+          baseCost: 75000,
+          description: 'Earth\'s cousin - a potentially habitable super-Earth.',
+          temperature: '15°C',
+          gravity: '1.6g',
+          atmosphere: 'Unknown',
+          population: 'Uninhabited',
+          tags: ['NASA', 'Habitable Zone', 'Super-Earth']
+        },
+        {
+          id: 'mars',
+          name: 'Mars',
+          type: 'planet',
+          distance: 0.000024,
+          baseCost: 25000,
+          description: 'The Red Planet - humanity\'s next frontier.',
+          temperature: '-80°C to 20°C',
+          gravity: '0.38g',
+          atmosphere: 'Thin CO2',
+          population: '1,000 colonists',
+          tags: ['Solar System', 'Colonized', 'Red Planet']
+        },
+        {
+          id: 'pandora',
+          name: 'Pandora',
+          type: 'fictional',
+          distance: 4.37,
+          baseCost: 150000,
+          description: 'Lush moon of Polyphemus with floating mountains.',
+          temperature: '25°C',
+          gravity: '0.8g',
+          atmosphere: 'Toxic to humans',
+          population: 'Na\'vi',
+          tags: ['Avatar', 'Bioluminescent', 'Dangerous']
+        }
+      ];
+
+      // Simple test component first
+      function SpaceApp() {
+        const [currentPage, setCurrentPage] = useState('home');
+        const [loading, setLoading] = useState(false);
+        const [planets, setPlanets] = useState(samplePlanets);
+        const [selectedPlanet, setSelectedPlanet] = useState(null);
+
+        return (
+          <div className="min-h-screen cosmic-bg">
+            {/* Navigation */}
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 bg-opacity-95 backdrop-blur-lg border-b border-blue-500 border-opacity-20">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xl">🚀</span>
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold text-white" style={{fontFamily: 'Orbitron, monospace'}}>
+                        Space Tourism Portal
+                      </h1>
+                      <p className="text-xs text-blue-400">2090</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:flex items-center space-x-8">
+                    <button
+                      onClick={() => setCurrentPage('home')}
+                      className={`transition-colors ${currentPage === 'home' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                    >
+                      Home
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage('destinations')}
+                      className={`transition-colors ${currentPage === 'destinations' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                    >
+                      Destinations
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage('spaceships')}
+                      className={`transition-colors ${currentPage === 'spaceships' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                    >
+                      Spaceships
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage('galaxy-map')}
+                      className={`transition-colors ${currentPage === 'galaxy-map' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                    >
+                      Galaxy Map
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage('booking')}
+                      className={`transition-colors ${currentPage === 'booking' ? 'text-blue-400' : 'text-gray-300 hover:text-blue-400'}`}
+                    >
+                      Booking
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </nav>
+
+            <main className="pt-16">
+              {/* Home Page */}
+              {currentPage === 'home' && (
+                <section className="relative overflow-hidden">
+                  <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                    <div className="text-center">
+                      <h1 className="text-5xl md:text-7xl font-bold text-white mb-6" style={{fontFamily: 'Orbitron, monospace'}}>
+                        Explore the
+                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+                          Galaxy
+                        </span>
+                      </h1>
+
+                      <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                        Book your interplanetary vacation to over 100 real and fictional planets.
+                        Experience the future of space tourism in 2090.
+                      </p>
+
+                      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <button
+                          onClick={() => setCurrentPage('destinations')}
+                          className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-lg hover:from-purple-600 hover:to-pink-500 transition-all duration-300 neon-glow"
+                        >
+                          Start Exploring →
+                        </button>
+
+                        <button
+                          onClick={() => setCurrentPage('galaxy-map')}
+                          className="px-8 py-4 border-2 border-blue-500 text-blue-400 font-bold rounded-lg hover:bg-blue-500 hover:text-white transition-all duration-300"
+                        >
+                          ▶ View Galaxy Map
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* Destinations Page */}
+              {currentPage === 'destinations' && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                  <div className="text-center mb-12">
+                    <h1 className="text-4xl md:text-6xl font-bold text-white mb-4" style={{fontFamily: 'Orbitron, monospace'}}>
+                      Galactic
+                      <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                        Destinations
+                      </span>
+                    </h1>
+                    <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                      Discover incredible planets across the galaxy. From NASA-confirmed exoplanets to fictional worlds.
+                    </p>
+                  </div>
+
+                  <div className="text-gray-400 text-sm mb-8">
+                    Showing {planets.length} destinations
+                  </div>
+
+                  {/* Planets Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {planets.map((planet) => (
+                      <div
+                        key={planet.id}
+                        className="group relative overflow-hidden rounded-lg bg-white bg-opacity-5 backdrop-blur-lg border border-gray-600 hover:border-blue-500 hover:border-opacity-50 transition-all duration-300 cursor-pointer"
+                        onClick={() => {
+                          setSelectedPlanet(planet);
+                          setCurrentPage('planet-details');
+                        }}
+                      >
+                        {/* Planet Image or Icon */}
+                        <div className="aspect-w-16 aspect-h-9 bg-gradient-to-br from-blue-500 from-opacity-20 to-purple-500 to-opacity-20 relative overflow-hidden">
+                          <div className="flex w-full h-48 items-center justify-center">
+                            <span className="text-6xl">
+                              {planet.type === 'exoplanet' ? '🪐' : planet.type === 'fictional' ? '🌌' : '🌍'}
+                            </span>
+                          </div>
+
+                          {/* Planet Type Badge */}
+                          <div className="absolute top-2 right-2">
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              planet.type === 'exoplanet'
+                                ? 'bg-green-500 bg-opacity-20 text-green-400 border border-green-500 border-opacity-50'
+                                : planet.type === 'fictional'
+                                ? 'bg-purple-500 bg-opacity-20 text-purple-400 border border-purple-500 border-opacity-50'
+                                : 'bg-blue-500 bg-opacity-20 text-blue-400 border border-blue-500 border-opacity-50'
+                            }`}>
+                              {planet.type === 'exoplanet' ? '🔬 NASA' : planet.type === 'fictional' ? '🎬 Fictional' : '🌍 Real'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-6">
+                          <div className="flex items-start justify-between mb-3">
+                            <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300">
+                              {planet.name}
+                            </h3>
+                          </div>
+
+                          <p className="text-gray-300 mb-4 line-clamp-2">
+                            {planet.description}
+                          </p>
+
+                          {planet.tags && planet.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {planet.tags.slice(0, 3).map((tag, tagIndex) => (
+                                <div key={tagIndex} className="flex items-center space-x-1 text-xs px-2 py-1 bg-white bg-opacity-10 rounded-full">
+                                  <span className="text-gray-300">{tag}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-1 text-sm text-gray-400">
+                              <span>📍</span>
+                              <span>{planet.distance} ly away</span>
+                            </div>
+                            <div className="text-green-400 font-bold">
+                              {planet.baseCost?.toLocaleString()} GC
+                            </div>
+                          </div>
+
+                          <button className="block w-full text-center px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-purple-600 hover:to-pink-500 transition-all duration-300 group-hover:neon-glow">
+                            Explore Planet
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Planet Details Page */}
+              {currentPage === 'planet-details' && selectedPlanet && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                  <button
+                    onClick={() => setCurrentPage('destinations')}
+                    className="mb-6 flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    <span>←</span>
+                    <span>Back to Destinations</span>
+                  </button>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                    <div>
+                      <div className="aspect-square bg-gradient-to-br from-blue-500 from-opacity-20 to-purple-500 to-opacity-20 rounded-lg p-12 flex items-center justify-center mb-6">
+                        <span className="text-9xl">
+                          {selectedPlanet.type === 'exoplanet' ? '🪐' : selectedPlanet.type === 'fictional' ? '🌌' : '🌍'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-white bg-opacity-5 rounded-lg">
+                          <h4 className="text-sm text-gray-400 mb-1">Distance</h4>
+                          <p className="text-white font-bold">{selectedPlanet.distance?.toFixed(1)} ly</p>
+                        </div>
+                        <div className="p-4 bg-white bg-opacity-5 rounded-lg">
+                          <h4 className="text-sm text-gray-400 mb-1">Gravity</h4>
+                          <p className="text-white font-bold">{selectedPlanet.gravity}</p>
+                        </div>
+                        <div className="p-4 bg-white bg-opacity-5 rounded-lg">
+                          <h4 className="text-sm text-gray-400 mb-1">Temperature</h4>
+                          <p className="text-white font-bold">{selectedPlanet.temperature}</p>
+                        </div>
+                        <div className="p-4 bg-white bg-opacity-5 rounded-lg">
+                          <h4 className="text-sm text-gray-400 mb-1">Cost</h4>
+                          <p className="text-green-400 font-bold">{selectedPlanet.baseCost?.toLocaleString()} GC</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h1 className="text-4xl font-bold text-white mb-4" style={{fontFamily: 'Orbitron, monospace'}}>
+                        {selectedPlanet.name}
+                      </h1>
+
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {selectedPlanet.tags?.map((tag, index) => (
+                          <span key={index} className="px-3 py-1 bg-blue-500 bg-opacity-20 text-blue-400 rounded-full text-sm">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <p className="text-xl text-gray-300 mb-8">
+                        {selectedPlanet.description}
+                      </p>
+
+                      <div className="mb-8">
+                        <h3 className="text-xl font-bold text-white mb-4">Atmosphere & Environment</h3>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="p-4 bg-white bg-opacity-5 rounded-lg">
+                            <h4 className="text-sm text-gray-400 mb-1">Atmosphere</h4>
+                            <p className="text-white">{selectedPlanet.atmosphere}</p>
+                          </div>
+                          <div className="p-4 bg-white bg-opacity-5 rounded-lg">
+                            <h4 className="text-sm text-gray-400 mb-1">Population</h4>
+                            <p className="text-white">{selectedPlanet.population}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <button
+                          onClick={() => setCurrentPage('booking')}
+                          className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-lg hover:from-purple-600 hover:to-pink-500 transition-all duration-300 neon-glow"
+                        >
+                          🚀 Book This Planet
+                        </button>
+                        <button
+                          className="px-6 py-4 border-2 border-blue-500 text-blue-400 font-bold rounded-lg hover:bg-blue-500 hover:text-white transition-all duration-300"
+                        >
+                          ⭐ Add to Favorites
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Other pages placeholder */}
+              {currentPage !== 'home' && currentPage !== 'destinations' && currentPage !== 'planet-details' && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                  <div className="text-center py-12">
+                    <span className="text-6xl mb-4 block">🚀</span>
+                    <h3 className="text-xl font-bold text-white mb-2">{currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}</h3>
+                    <p className="text-gray-400">Coming soon...</p>
+                  </div>
+                </div>
+              )}
+            </main>
+          </div>
+        );
+      }
+
+      console.log('React:', typeof React);
+      console.log('ReactDOM:', typeof ReactDOM);
+      
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<SpaceApp />);
+    </script>
+  </body>
+</html>

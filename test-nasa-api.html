@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0a0a0f;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-item {
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .image-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .loading {
+            color: #00f5ff;
+        }
+        .error {
+            color: #ff4444;
+        }
+        .success {
+            color: #44ff44;
+        }
+        button {
+            background: linear-gradient(45deg, #00f5ff, #bf00ff);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>NASA API Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Test NASA Exoplanet API</h2>
+        <button onclick="testExoplanetAPI()">Test Exoplanet API</button>
+        <div id="exoplanet-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test NASA Image API</h2>
+        <button onclick="testImageAPI()">Test Image API</button>
+        <div id="image-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Curated NASA Images</h2>
+        <button onclick="testCuratedImages()">Test Curated Images</button>
+        <div id="curated-results" class="image-grid"></div>
+    </div>
+
+    <script>
+        const NASA_API_KEY = 'uOMS8AKUbcK9MLgnDaVN6wvYXpwfiOBW1SetEXzr';
+        const NASA_EXOPLANET_API = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync';
+        const NASA_IMAGE_API = 'https://images-api.nasa.gov/search';
+
+        async function testExoplanetAPI() {
+            const resultsDiv = document.getElementById('exoplanet-results');
+            resultsDiv.innerHTML = '<p class="loading">Testing NASA Exoplanet API...</p>';
+
+            try {
+                const query = `SELECT TOP 10 pl_name,sy_dist,pl_rade,pl_masse,pl_orbper,pl_eqt,disc_year FROM ps WHERE pl_name IS NOT NULL AND sy_dist IS NOT NULL AND sy_dist < 100 ORDER BY sy_dist ASC`;
+                
+                const response = await fetch(NASA_EXOPLANET_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `query=${encodeURIComponent(query)}&format=json`
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    resultsDiv.innerHTML = `
+                        <p class="success">✅ NASA Exoplanet API working! Found ${data.length} exoplanets.</p>
+                        <pre>${JSON.stringify(data.slice(0, 3), null, 2)}</pre>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = '<p class="error">❌ No exoplanet data returned</p>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">❌ NASA Exoplanet API failed: ${error.message}</p>`;
+                console.error('Exoplanet API error:', error);
+            }
+        }
+
+        async function testImageAPI() {
+            const resultsDiv = document.getElementById('image-results');
+            resultsDiv.innerHTML = '<p class="loading">Testing NASA Image API...</p>';
+
+            try {
+                const response = await fetch(`${NASA_IMAGE_API}?q=exoplanet&media_type=image&page_size=5`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.collection && data.collection.items && data.collection.items.length > 0) {
+                    const images = data.collection.items.map(item => ({
+                        title: item.data[0].title,
+                        url: item.links ? item.links[0].href : null
+                    }));
+                    
+                    resultsDiv.innerHTML = `
+                        <p class="success">✅ NASA Image API working! Found ${images.length} images.</p>
+                        <div class="image-grid">
+                            ${images.map(img => `
+                                <div class="image-item">
+                                    <img src="${img.url}" alt="${img.title}" onerror="this.style.display='none'">
+                                    <p style="font-size: 12px; margin-top: 5px;">${img.title}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = '<p class="error">❌ No image data returned</p>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">❌ NASA Image API failed: ${error.message}</p>`;
+                console.error('Image API error:', error);
+            }
+        }
+
+        async function testCuratedImages() {
+            const resultsDiv = document.getElementById('curated-results');
+            resultsDiv.innerHTML = '<p class="loading">Testing curated NASA images...</p>';
+
+            const curatedImages = [
+                'https://images-assets.nasa.gov/image/PIA23122/PIA23122~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA21421/PIA21421~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA19827/PIA19827~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA21422/PIA21422~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA23317/PIA23317~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA21424/PIA21424~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA25962/PIA25962~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA22081/PIA22081~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA21068/PIA21068~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA23123/PIA23123~medium.jpg'
+            ];
+
+            let loadedCount = 0;
+            let errorCount = 0;
+
+            resultsDiv.innerHTML = '';
+
+            curatedImages.forEach((url, index) => {
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'image-item';
+                imageDiv.innerHTML = `
+                    <img src="${url}" alt="NASA Image ${index + 1}" 
+                         onload="imageLoaded()" 
+                         onerror="imageError(this)">
+                    <p style="font-size: 12px; margin-top: 5px;">Image ${index + 1}</p>
+                `;
+                resultsDiv.appendChild(imageDiv);
+            });
+
+            window.imageLoaded = function() {
+                loadedCount++;
+                updateCuratedStatus();
+            };
+
+            window.imageError = function(img) {
+                errorCount++;
+                img.style.display = 'none';
+                img.nextElementSibling.style.color = '#ff4444';
+                img.nextElementSibling.textContent += ' (Failed to load)';
+                updateCuratedStatus();
+            };
+
+            function updateCuratedStatus() {
+                if (loadedCount + errorCount === curatedImages.length) {
+                    const statusDiv = document.createElement('div');
+                    statusDiv.innerHTML = `
+                        <p class="${loadedCount > 0 ? 'success' : 'error'}">
+                            ${loadedCount > 0 ? '✅' : '❌'} Curated images test complete: 
+                            ${loadedCount} loaded, ${errorCount} failed
+                        </p>
+                    `;
+                    resultsDiv.insertBefore(statusDiv, resultsDiv.firstChild);
+                }
+            }
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            console.log('NASA API Test Page loaded');
+        });
+    </script>
+</body>
+</html>

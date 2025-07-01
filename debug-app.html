@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Space Tourism App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0a0a0f;
+            color: white;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: rgba(68, 255, 68, 0.2); border: 1px solid #44ff44; }
+        .error { background: rgba(255, 68, 68, 0.2); border: 1px solid #ff4444; }
+        .warning { background: rgba(255, 255, 68, 0.2); border: 1px solid #ffff44; }
+        .info { background: rgba(68, 245, 255, 0.2); border: 1px solid #44f5ff; }
+        button {
+            background: linear-gradient(45deg, #00f5ff, #bf00ff);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { opacity: 0.8; }
+        pre {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Space Tourism App Debug Console</h1>
+    
+    <div class="debug-section">
+        <h2>App Status Check</h2>
+        <button onclick="checkAppStatus()">Check App Status</button>
+        <div id="app-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>NASA API Status</h2>
+        <button onclick="checkNASAAPI()">Check NASA APIs</button>
+        <div id="nasa-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Image Loading Test</h2>
+        <button onclick="testImageLoading()">Test Planet Images</button>
+        <div id="image-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Main Application</h2>
+        <p>The main Space Tourism Portal should be running below:</p>
+        <iframe src="/" title="Space Tourism Portal"></iframe>
+    </div>
+
+    <script>
+        async function checkAppStatus() {
+            const statusDiv = document.getElementById('app-status');
+            statusDiv.innerHTML = '<div class="info">Checking app status...</div>';
+
+            const checks = [];
+
+            // Check if main page loads
+            try {
+                const response = await fetch('/');
+                if (response.ok) {
+                    checks.push({ name: 'Main page', status: 'success', message: 'Loads successfully' });
+                } else {
+                    checks.push({ name: 'Main page', status: 'error', message: `HTTP ${response.status}` });
+                }
+            } catch (error) {
+                checks.push({ name: 'Main page', status: 'error', message: error.message });
+            }
+
+            // Check if React is working (look for React-specific elements)
+            try {
+                const response = await fetch('/');
+                const html = await response.text();
+                if (html.includes('react') || html.includes('React') || html.includes('root')) {
+                    checks.push({ name: 'React setup', status: 'success', message: 'React elements detected' });
+                } else {
+                    checks.push({ name: 'React setup', status: 'warning', message: 'No React elements detected in HTML' });
+                }
+            } catch (error) {
+                checks.push({ name: 'React setup', status: 'error', message: error.message });
+            }
+
+            // Display results
+            statusDiv.innerHTML = checks.map(check => `
+                <div class="status ${check.status}">
+                    <strong>${check.name}:</strong> ${check.message}
+                </div>
+            `).join('');
+        }
+
+        async function checkNASAAPI() {
+            const statusDiv = document.getElementById('nasa-status');
+            statusDiv.innerHTML = '<div class="info">Checking NASA APIs...</div>';
+
+            const checks = [];
+
+            // Test NASA Image API
+            try {
+                const response = await fetch('https://images-api.nasa.gov/search?q=exoplanet&media_type=image&page_size=1');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.collection && data.collection.items && data.collection.items.length > 0) {
+                        checks.push({ name: 'NASA Image API', status: 'success', message: 'Working correctly' });
+                    } else {
+                        checks.push({ name: 'NASA Image API', status: 'warning', message: 'No results returned' });
+                    }
+                } else {
+                    checks.push({ name: 'NASA Image API', status: 'error', message: `HTTP ${response.status}` });
+                }
+            } catch (error) {
+                checks.push({ name: 'NASA Image API', status: 'error', message: error.message });
+            }
+
+            // Test NASA Exoplanet API
+            try {
+                const query = 'SELECT TOP 1 pl_name FROM ps WHERE pl_name IS NOT NULL';
+                const response = await fetch('https://exoplanetarchive.ipac.caltech.edu/TAP/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `query=${encodeURIComponent(query)}&format=json`
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        checks.push({ name: 'NASA Exoplanet API', status: 'success', message: 'Working correctly' });
+                    } else {
+                        checks.push({ name: 'NASA Exoplanet API', status: 'warning', message: 'No results returned' });
+                    }
+                } else {
+                    checks.push({ name: 'NASA Exoplanet API', status: 'error', message: `HTTP ${response.status}` });
+                }
+            } catch (error) {
+                checks.push({ name: 'NASA Exoplanet API', status: 'error', message: error.message });
+            }
+
+            // Display results
+            statusDiv.innerHTML = checks.map(check => `
+                <div class="status ${check.status}">
+                    <strong>${check.name}:</strong> ${check.message}
+                </div>
+            `).join('');
+        }
+
+        async function testImageLoading() {
+            const statusDiv = document.getElementById('image-status');
+            statusDiv.innerHTML = '<div class="info">Testing planet images...</div>';
+
+            const testImages = [
+                'https://images-assets.nasa.gov/image/PIA23122/PIA23122~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA21421/PIA21421~medium.jpg',
+                'https://images-assets.nasa.gov/image/PIA19827/PIA19827~medium.jpg'
+            ];
+
+            const results = [];
+
+            for (const imageUrl of testImages) {
+                try {
+                    const response = await fetch(imageUrl, { method: 'HEAD' });
+                    if (response.ok) {
+                        results.push({ url: imageUrl, status: 'success', message: 'Image loads successfully' });
+                    } else {
+                        results.push({ url: imageUrl, status: 'error', message: `HTTP ${response.status}` });
+                    }
+                } catch (error) {
+                    results.push({ url: imageUrl, status: 'error', message: error.message });
+                }
+            }
+
+            statusDiv.innerHTML = results.map(result => `
+                <div class="status ${result.status}">
+                    <strong>Image:</strong> ${result.url.split('/').pop()}<br>
+                    <small>${result.message}</small>
+                </div>
+            `).join('');
+        }
+
+        // Auto-run basic checks on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkAppStatus();
+                checkNASAAPI();
+                testImageLoading();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
