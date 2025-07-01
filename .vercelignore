@@ -1,0 +1,15 @@
+# Ignore React/Vite build files - we're using static HTML
+src/
+vite.config.js
+package.json
+package-lock.json
+node_modules/
+dist/
+build/
+
+# Keep only the main HTML file and assets
+!index.html
+!vercel.json
+!.env.example
+!README.md
+!DEPLOYMENT.md

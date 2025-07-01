@@ -1,10 +1,9 @@
 {
   "version": 2,
-  "name": "space-tourism-portal",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "index.html",
+      "use": "@vercel/static"
     }
   ],
   "headers": [
